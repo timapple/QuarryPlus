@@ -90,7 +90,7 @@ public class BlockMiningWell extends BlockContainer {
 		super.onBlockPlacedBy(w, x, y, z, el, is);
 		ForgeDirection orientation = get2dOrientation(el.posX, el.posZ, x, z);
 		w.setBlockMetadataWithNotify(x, y, z, orientation.getOpposite().ordinal(), 1);
-		EnchantmentHelper.init((IEnchantableTile) w.getBlockTileEntity(x, y, z), is.getEnchantmentTagList());
+		EnchantmentHelper.init((IEnchantableTile) w.getBlockTileEntity(x, y, z), is);
 	}
 
 	private static ForgeDirection get2dOrientation(double x1, double z1, double x2, double z2) {
@@ -147,6 +147,6 @@ public class BlockMiningWell extends BlockContainer {
 
 	@Override
 	public void onNeighborBlockChange(World world, int x, int y, int z, int blockId) {
-		if (!world.isRemote) ((TileBasic) world.getBlockTileEntity(x, y, z)).G_renew_powerConfigure();
+		if (!world.isRemote) ((TileMiningCore) world.getBlockTileEntity(x, y, z)).G_renew_powerConfigure();
 	}
 }

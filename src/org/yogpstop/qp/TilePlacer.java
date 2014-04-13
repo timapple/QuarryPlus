@@ -164,4 +164,9 @@ public class TilePlacer extends TileEntity implements IInventory, IMachine {
 	public boolean allowAction(IAction action) {
 		return false;
 	}
+	
+	@Override
+	public boolean canUpdate() {
+		return false;
+	}
 }

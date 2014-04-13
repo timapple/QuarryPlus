@@ -36,9 +36,9 @@ public class GuiHandler implements IGuiHandler {
 		case guiIdMover:
 			return new GuiMover(player, world, x, y, z);
 		case guiIdFList:
-			return new GuiQ_List((byte) 0, (TileBasic) world.getBlockTileEntity(x, y, z));
+			return new GuiQ_List((byte) 0, (TileMiningCore) world.getBlockTileEntity(x, y, z));
 		case guiIdSList:
-			return new GuiQ_List((byte) 1, (TileBasic) world.getBlockTileEntity(x, y, z));
+			return new GuiQ_List((byte) 1, (TileMiningCore) world.getBlockTileEntity(x, y, z));
 		case guiIdInfMJSrc:
 			return new GuiInfMJSrc((TileInfMJSrc) world.getBlockTileEntity(x, y, z));
 		case guiIdPlacer:

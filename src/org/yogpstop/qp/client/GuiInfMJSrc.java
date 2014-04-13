@@ -45,6 +45,7 @@ public class GuiInfMJSrc extends GuiScreenA {
 		this.tile = pt;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void initGui() {
 		super.initGui();

@@ -32,22 +32,17 @@ import buildcraft.api.power.PowerHandler.Type;
 import buildcraft.core.EntityEnergyLaser;
 import buildcraft.core.IMachine;
 import buildcraft.core.triggers.ActionMachineControl;
-import buildcraft.silicon.ILaserTarget;
+import buildcraft.api.power.ILaserTarget;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeDirection;
 
-public class TileLaser extends TileEntity implements IPowerReceptor, IActionReceptor, IMachine, IEnchantableTile {
+public class TileLaser extends AEnchantableTile implements IPowerReceptor, IActionReceptor, IMachine {
 	private EntityEnergyLaser[] lasers;
-	private final List<ILaserTarget> laserTargets = new ArrayList<ILaserTarget>();
+	private final List<ILaserTarget> laserTargets = new ArrayList<buildcraft.api.power.ILaserTarget>();
 	protected final PowerHandler powerHandler = new PowerHandler(this, Type.MACHINE);
 	private ActionMachineControl.Mode lastMode = ActionMachineControl.Mode.Unknown;
-
-	protected byte unbreaking;
-	protected byte fortune;
-	protected byte efficiency;
-	protected boolean silktouch;
 
 	public TileLaser() {
 		PowerManager.configureL(this.powerHandler, this.efficiency, this.unbreaking);
@@ -114,7 +109,7 @@ public class TileLaser extends TileEntity implements IPowerReceptor, IActionRece
 	protected boolean isValidTable() {
 		if (this.laserTargets.size() == 0) return false;
 		for (ILaserTarget lt : this.laserTargets)
-			if (lt == null || lt.isInvalidTarget() || !lt.hasCurrentWork()) return false;
+			if (lt == null || lt.isInvalidTarget() || !lt.requiresLaserEnergy()) return false;
 		return true;
 	}
 
@@ -159,7 +154,7 @@ public class TileLaser extends TileEntity implements IPowerReceptor, IActionRece
 					TileEntity tile = this.worldObj.getBlockTileEntity(x, y, z);
 					if (tile instanceof ILaserTarget) {
 						ILaserTarget table = (ILaserTarget) tile;
-						if (table.hasCurrentWork() && !table.isInvalidTarget()) {
+						if (table.requiresLaserEnergy() && !table.isInvalidTarget()) {
 							this.laserTargets.add(table);
 						}
 					}
@@ -253,35 +248,8 @@ public class TileLaser extends TileEntity implements IPowerReceptor, IActionRece
 	}
 
 	@Override
-	public byte getEfficiency() {
-		return this.efficiency;
-	}
-
-	@Override
-	public byte getFortune() {
-		return this.fortune;
-	}
-
-	@Override
-	public byte getUnbreaking() {
-		return this.unbreaking;
-	}
-
-	@Override
-	public boolean getSilktouch() {
-		return this.silktouch;
-	}
-
-	@Override
-	public void set(byte pefficiency, byte pfortune, byte punbreaking, boolean psilktouch) {
-		this.efficiency = pefficiency;
-		this.fortune = pfortune;
-		this.unbreaking = punbreaking;
-		this.silktouch = psilktouch;
-	}
-
-	@Override
 	public void G_reinit() {
 		PowerManager.configureL(this.powerHandler, this.efficiency, this.unbreaking);
 	}
+
 }

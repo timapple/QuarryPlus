@@ -23,10 +23,11 @@ import net.minecraft.tileentity.TileEntity;
 
 import com.google.common.io.ByteArrayDataInput;
 
-public abstract class APacketTile extends TileEntity {
-	abstract void S_recievePacket(byte pattern, ByteArrayDataInput data, EntityPlayer ep);
+public abstract class APacketRecieverTile extends TileEntity implements IPacketReciever {
+	
+	public void S_recievePacket(byte pattern, ByteArrayDataInput data, EntityPlayer ep) {};
 
-	abstract void C_recievePacket(byte pattern, ByteArrayDataInput data, EntityPlayer ep);
+	public void C_recievePacket(byte pattern, ByteArrayDataInput data, EntityPlayer ep) {};
 
 	@Override
 	public final Packet getDescriptionPacket() {

@@ -95,7 +95,7 @@ public class BlockLaser extends BlockContainer {
 
 	@Override
 	public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase ent, ItemStack is) {
-		EnchantmentHelper.init((IEnchantableTile) world.getBlockTileEntity(x, y, z), is.getEnchantmentTagList());
+		EnchantmentHelper.init((IEnchantableTile) world.getBlockTileEntity(x, y, z), is);
 	}
 
 	private final ArrayList<ItemStack> drop = new ArrayList<ItemStack>();

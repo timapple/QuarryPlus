@@ -19,8 +19,6 @@ package org.yogpstop.qp;
 
 import static org.yogpstop.qp.PacketHandler.*;
 
-import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -31,7 +29,6 @@ import com.google.common.io.ByteArrayDataInput;
 import cpw.mods.fml.common.network.PacketDispatcher;
 import buildcraft.api.core.IAreaProvider;
 import buildcraft.api.core.LaserKind;
-import static buildcraft.BuildCraftFactory.frameBlock;
 import buildcraft.core.Box;
 import buildcraft.core.proxy.CoreProxy;
 import static buildcraft.core.utils.Utils.addToRandomPipeAround;
@@ -48,11 +45,27 @@ import net.minecraftforge.common.ForgeChunkManager;
 import net.minecraftforge.common.ForgeChunkManager.Ticket;
 import net.minecraftforge.common.ForgeChunkManager.Type;
 import net.minecraftforge.common.ForgeDirection;
+import static org.yogpstop.qp.QuarryPlus.frameBlock;
 
-public class TileQuarry extends TileBasic {
+public class TileQuarry extends TileMiningCore {
+	
+	static final byte NONE = 0;
+	static final byte NOTNEEDBREAK = 1;
+	static final byte MAKEFRAME = 2;
+	static final byte MOVEHEAD = 4;
+	static final byte BREAKBLOCK = 5;
+
+	private double headPosX, headPosY, headPosZ;
+	final Box box = new Box();
+	private EntityMechanicalArm heads;
+	private boolean initialized = true;
+	private byte now = NONE;
 	private int targetX, targetY, targetZ;
 
 	private IAreaProvider iap = null;
+	
+	//public EntityPlayer placedBy; 
+	public String owner = "[BuildCraft]";
 
 	private void S_updateEntity() {
 		if (this.iap != null) {
@@ -60,6 +73,11 @@ public class TileQuarry extends TileBasic {
 			else this.iap.removeFromWorld();
 			this.iap = null;
 		}
+		
+		byte old_now = now;
+		boolean old_nee = notEnoughEnergy;
+		notEnoughEnergy = false;
+		
 		switch (this.now) {
 		case MAKEFRAME:
 			if (S_makeFrame()) while (!S_checkTarget())
@@ -70,41 +88,23 @@ public class TileQuarry extends TileBasic {
 			if (this.heads != null) {
 				this.heads.setHead(this.headPosX, this.headPosY, this.headPosZ);
 				this.heads.updatePosition();
-				try {
-					ByteArrayOutputStream bos = new ByteArrayOutputStream();
-					DataOutputStream dos = new DataOutputStream(bos);
-					dos.writeInt(this.xCoord);
-					dos.writeInt(this.yCoord);
-					dos.writeInt(this.zCoord);
-					dos.writeByte(StC_HEAD_POS);
-					dos.writeDouble(this.headPosX);
-					dos.writeDouble(this.headPosY);
-					dos.writeDouble(this.headPosZ);
-					PacketDispatcher.sendPacketToAllAround(this.xCoord, this.yCoord, this.zCoord, 256, this.worldObj.provider.dimensionId,
-							composeTilePacket(bos));
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+				sendHeadPosPacket(this, this.headPosX, this.headPosY, this.headPosZ);
 			}
 			if (!done) break;
 			this.now = BREAKBLOCK;
 		case NOTNEEDBREAK:
 		case BREAKBLOCK:
-			if (S_breakBlock()) while (!S_checkTarget())
-				S_setNextTarget();
+			if (S_breakBlock()) 
+				while (!S_checkTarget())
+					S_setNextTarget();
 			break;
 		}
-		List<ItemStack> todelete = new LinkedList<ItemStack>();
-		for (ItemStack is : this.cacheItems) {
-			int added = addToRandomInventoryAround(this.worldObj, this.xCoord, this.yCoord, this.zCoord, is);
-			is.stackSize -= added;
-			if (is.stackSize > 0) {
-				added = addToRandomPipeAround(this.worldObj, this.xCoord, this.yCoord, this.zCoord, ForgeDirection.UNKNOWN, is);
-				is.stackSize -= added;
-			}
-			if (is.stackSize <= 0) todelete.add(is);
+		
+		if (old_nee != notEnoughEnergy || old_now != now) {
+			sendNowPacket(this, now, notEnoughEnergy);
 		}
-		this.cacheItems.removeAll(todelete);
+		
+		distributeItems();
 	}
 
 	private boolean S_checkTarget() {
@@ -114,8 +114,8 @@ public class TileQuarry extends TileBasic {
 		case BREAKBLOCK:
 		case MOVEHEAD:
 			if (this.targetY < 1) {
-				G_destroy();
-				sendNowPacket(this, this.now);
+				G_destroy(); // update now
+				//sendNowPacket(this, this.now);
 				return true;
 			}
 			if (bid == 0 || bid == Block.bedrock.blockID) return false;
@@ -130,7 +130,7 @@ public class TileQuarry extends TileBasic {
 				this.targetZ = this.box.zMin;
 				this.addX = this.addZ = this.digged = true;
 				this.changeZ = false;
-				sendNowPacket(this, this.now);
+				//sendNowPacket(this, this.now);
 				return S_checkTarget();
 			}
 			if (bid == 0 || bid == Block.bedrock.blockID) return false;
@@ -156,7 +156,7 @@ public class TileQuarry extends TileBasic {
 						.sizeX() - 1.5D, this.box.sizeZ() - 1.5D, this));
 				this.heads.setHead(this.headPosX, this.headPosY, this.headPosZ);
 				this.heads.updatePosition();
-				sendNowPacket(this, this.now);
+				//sendNowPacket(this, this.now);
 				return S_checkTarget();
 			}
 			if (bid == Block.bedrock.blockID) return false;
@@ -169,7 +169,7 @@ public class TileQuarry extends TileBasic {
 				this.targetY = this.box.yMax;
 				this.addX = this.addZ = this.digged = true;
 				this.changeZ = false;
-				sendNowPacket(this, this.now);
+				//sendNowPacket(this, this.now);
 				return S_checkTarget();
 			}
 			byte flag = 0;
@@ -182,7 +182,7 @@ public class TileQuarry extends TileBasic {
 			}
 			return false;
 		}
-		System.err.println("yogpstop: Unknown status");
+		System.err.println("QuarryPlus: Unknown status");
 		return true;
 	}
 
@@ -266,14 +266,22 @@ public class TileQuarry extends TileBasic {
 	}
 
 	private boolean S_makeFrame() {
+		if (QuarryPlus.proxy.eventQuarryMakeFrame( this, this.targetX, this.targetY, this.targetZ )) return false;		
+		
 		this.digged = true;
-		if (!PowerManager.useEnergyF(this.pp, this.unbreaking)) return false;
+		if (!PowerManager.useEnergyF(this.pp, this.unbreaking)) {
+			notEnoughEnergy = true;
+			return false;
+		}
+		
 		this.worldObj.setBlock(this.targetX, this.targetY, this.targetZ, frameBlock.blockID);
 		S_setNextTarget();
-		return true;
+		return true;	
 	}
 
-	private boolean S_breakBlock() {
+	private boolean S_breakBlock() {		
+		if (QuarryPlus.proxy.eventQuarryBreakBlock( this, this.targetX, this.targetY, this.targetZ )) return false;
+		
 		this.digged = true;
 		if (S_breakBlock(this.targetX, this.targetY, this.targetZ, PowerManager.BreakType.Quarry)) {
 			S_checkDropItem();
@@ -410,7 +418,10 @@ public class TileQuarry extends TileBasic {
 			this.headPosX += x * blocks / distance;
 			this.headPosY += y * blocks / distance;
 			this.headPosZ += z * blocks / distance;
+			return false;
 		}
+		
+		notEnoughEnergy = true;
 		return false;
 	}
 
@@ -429,7 +440,7 @@ public class TileQuarry extends TileBasic {
 		this.box.deleteLasers();
 		if (!this.worldObj.isRemote) {
 			S_destroyFrames();
-			sendNowPacket(this, this.now);
+			//sendNowPacket(this, this.now);
 		}
 		ForgeChunkManager.releaseTicket(this.chunkTicket);
 	}
@@ -442,9 +453,9 @@ public class TileQuarry extends TileBasic {
 		G_initEntities();
 		if (!this.worldObj.isRemote) {
 			S_setFirstPos();
+			sendNowPacket(this, this.now, notEnoughEnergy);
 			PacketDispatcher.sendPacketToAllAround(this.xCoord, this.yCoord, this.zCoord, 256, this.worldObj.provider.dimensionId,
 					PacketHandler.getPacketFromNBT(this));
-			sendNowPacket(this, this.now);
 		}
 	}
 
@@ -499,6 +510,8 @@ public class TileQuarry extends TileBasic {
 		this.headPosX = nbttc.getDouble("headPosX");
 		this.headPosY = nbttc.getDouble("headPosY");
 		this.headPosZ = nbttc.getDouble("headPosZ");
+		if (nbttc.hasKey("owner"))
+			owner = nbttc.getString("owner");
 		this.initialized = false;
 	}
 
@@ -517,22 +530,11 @@ public class TileQuarry extends TileBasic {
 		nbttc.setDouble("headPosX", this.headPosX);
 		nbttc.setDouble("headPosY", this.headPosY);
 		nbttc.setDouble("headPosZ", this.headPosZ);
+		nbttc.setString("owner", owner);
 	}
 
-	static final byte NONE = 0;
-	static final byte NOTNEEDBREAK = 1;
-	static final byte MAKEFRAME = 2;
-	static final byte MOVEHEAD = 4;
-	static final byte BREAKBLOCK = 5;
-
-	private double headPosX, headPosY, headPosZ;
-	final Box box = new Box();
-	private EntityMechanicalArm heads;
-	private boolean initialized = true;
-	private byte now = NONE;
-
 	@Override
-	protected void C_recievePacket(byte pattern, ByteArrayDataInput data, EntityPlayer ep) {
+	public void C_recievePacket(byte pattern, ByteArrayDataInput data, EntityPlayer ep) {
 		super.C_recievePacket(pattern, data, ep);
 		switch (pattern) {
 		case StC_NOW:
@@ -546,6 +548,13 @@ public class TileQuarry extends TileBasic {
 			this.headPosY = data.readDouble();
 			this.headPosZ = data.readDouble();
 			if (this.heads != null) this.heads.setHead(this.headPosX, this.headPosY, this.headPosZ);
+			break;
+		case StC_NOW2:
+			this.now = data.readByte();
+			this.notEnoughEnergy = data.readBoolean();
+			G_renew_powerConfigure();
+			this.worldObj.markBlockForRenderUpdate(this.xCoord, this.yCoord, this.zCoord);
+			G_initEntities();
 			break;
 		}
 	}
@@ -582,6 +591,7 @@ public class TileQuarry extends TileBasic {
 
 	@Override
 	protected void G_renew_powerConfigure() {
+		super.G_renew_powerConfigure();
 		TileEntity te = this.worldObj.getBlockTileEntity(this.xCoord + this.pump.offsetX, this.yCoord + this.pump.offsetY, this.zCoord + this.pump.offsetZ);
 		byte pmp = 0;
 		if (te instanceof TilePump) pmp = ((TilePump) te).unbreaking;
@@ -590,4 +600,19 @@ public class TileQuarry extends TileBasic {
 		else if (this.now == MAKEFRAME) PowerManager.configureF(this.pp, this.efficiency, this.unbreaking, pmp);
 		else PowerManager.configureB(this.pp, this.efficiency, this.unbreaking, pmp);
 	}
+	
+	protected void distributeItems() {
+		List<ItemStack> todelete = new LinkedList<ItemStack>();
+		for (ItemStack is : this.cacheItems) {
+			int added = addToRandomInventoryAround(this.worldObj, this.xCoord, this.yCoord, this.zCoord, is);
+			is.stackSize -= added;
+			if (is.stackSize > 0) {
+				added = addToRandomPipeAround(this.worldObj, this.xCoord, this.yCoord, this.zCoord, ForgeDirection.UNKNOWN, is);
+				is.stackSize -= added;
+			}
+			if (is.stackSize <= 0) todelete.add(is);
+		}
+		this.cacheItems.removeAll(todelete);
+	}
+
 }

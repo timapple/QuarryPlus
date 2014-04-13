@@ -46,6 +46,7 @@ public class GuiMover extends GuiContainer {
 		this.inventorySlots = new ContainerMover(player, world, x, y, z, this);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void initGui() {
 		super.initGui();

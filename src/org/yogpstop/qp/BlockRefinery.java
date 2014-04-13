@@ -79,7 +79,7 @@ public class BlockRefinery extends BlockContainer {
 	@Override
 	public void onBlockPlacedBy(World w, int x, int y, int z, EntityLivingBase el, ItemStack is) {
 		super.onBlockPlacedBy(w, x, y, z, el, is);
-		EnchantmentHelper.init((IEnchantableTile) w.getBlockTileEntity(x, y, z), is.getEnchantmentTagList());
+		EnchantmentHelper.init((IEnchantableTile) w.getBlockTileEntity(x, y, z), is);
 		ForgeDirection orientation = Utils.get2dOrientation(new Position(el.posX, el.posY, el.posZ), new Position(x, y, z));
 		w.setBlockMetadataWithNotify(x, y, z, orientation.getOpposite().ordinal(), 1);
 	}

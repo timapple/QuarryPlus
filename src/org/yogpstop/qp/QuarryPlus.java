@@ -43,14 +43,15 @@ import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.network.NetworkMod;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
+//import cpw.mods.fml.common.event.FMLServerStartingEvent;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.common.registry.LanguageRegistry;
 import cpw.mods.fml.common.network.NetworkRegistry;
 
-@Mod(modid = "QuarryPlus", name = "QuarryPlus", version = "@VERSION@", dependencies = "required-after:BuildCraft|Builders;required-after:BuildCraft|Core;required-after:BuildCraft|Energy;required-after:BuildCraft|Factory;required-after:BuildCraft|Silicon;required-after:BuildCraft|Transport")
+@Mod(modid = "QuarryPlus", name = "QuarryPlus", version = "1.5.6.0", dependencies = "required-after:BuildCraft|Builders;required-after:BuildCraft|Core;required-after:BuildCraft|Energy;required-after:BuildCraft|Factory;required-after:BuildCraft|Silicon;required-after:BuildCraft|Transport")
 @NetworkMod(clientSideRequired = true, serverSideRequired = false, channels = { PacketHandler.BTN, PacketHandler.NBT, PacketHandler.Tile, PacketHandler.Marker }, packetHandler = PacketHandler.class)
 public class QuarryPlus {
-	@SidedProxy(clientSide = "org.yogpstop.qp.client.ClientProxy", serverSide = "org.yogpstop.qp.CommonProxy")
+	@SidedProxy(clientSide = "org.yogpstop.qp.client.ClientProxy", serverSide = "org.yogpstop.qp.ServerProxy")
 	public static CommonProxy proxy;
 
 	@Mod.Instance("QuarryPlus")
@@ -58,7 +59,7 @@ public class QuarryPlus {
 
 	public static final int refineryRenderID = RenderingRegistry.getNextAvailableRenderId();
 
-	public static Block blockQuarry, blockMarker, blockMover, blockMiningWell, blockPump, blockInfMJSrc, blockRefinery, blockPlacer, blockBreaker, blockLaser;
+	public static Block blockQuarry, blockMarker, blockMover, blockMiningWell, blockPump, blockInfMJSrc, blockRefinery, blockPlacer, blockBreaker, blockLaser, frameBlock;
 	public static Item itemTool;
 
 	public static int RecipeDifficulty;
@@ -124,17 +125,19 @@ public class QuarryPlus {
 			blockBreaker = (new BlockBreaker(bid[8]));
 			blockLaser = (new BlockLaser(bid[9]));
 			itemTool = (new ItemTool(iid));
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		LanguageRegistry.instance().loadLocalization("/lang/yogpstop/quarryplus/en_US.lang", "en_US", false);
 		LanguageRegistry.instance().loadLocalization("/lang/yogpstop/quarryplus/ja_JP.lang", "ja_JP", false);
+		LanguageRegistry.instance().loadLocalization("/lang/yogpstop/quarryplus/ru_RU.lang", "ru_RU", false);
 		ForgeChunkManager.setForcedChunkLoadingCallback(instance, new ChunkLoadingHandler());
 		MinecraftForge.EVENT_BUS.register(this);
 	}
 
 	@Mod.EventHandler
-	public void init(FMLInitializationEvent event) {
+	public void init(FMLInitializationEvent event) throws Exception {
 		GameRegistry.registerBlock(blockQuarry, ItemBlockQuarry.class, "QuarryPlus");
 		GameRegistry.registerBlock(blockMarker, "MarkerPlus");
 		GameRegistry.registerBlock(blockMover, "EnchantMover");
@@ -305,8 +308,24 @@ public class QuarryPlus {
 		}
 		NetworkRegistry.instance().registerGuiHandler(this, new GuiHandler());
 		proxy.registerTextures();
+		
+		//frameBlock = GameRegistry.findBlock("BuildCraft|Factory", "frameBlock"); 
+		frameBlock = buildcraft.BuildCraftFactory.frameBlock;
+		System.out.println("frameBlock = " + frameBlock);
+		if (frameBlock == null) throw new Exception("frameBlock is null");
 	}
 
+	/*@Mod.EventHandler
+	public void postInit(FMLPostInitializationEvent event) {
+		
+	}*/
+	
+	/*@Mod.EventHandler
+	public void serverLoad(FMLServerStartingEvent event)
+	{
+		event.registerServerCommand(new SampleCommand());
+	}*/
+	
 	public static String getname(short blockid, int meta) {
 		StringBuffer sb = new StringBuffer();
 		sb.append(blockid);
@@ -336,7 +355,7 @@ public class QuarryPlus {
 
 	public static CreativeTabs ct = null;
 	static {
-		final Class ctc = buildcraft.core.CreativeTabBuildCraft.class;
+		final Class<?> ctc = buildcraft.core.CreativeTabBuildCraft.class;
 		try {
 			ct = (CreativeTabs) ctc.getField("tabBuildCraft").get(null);
 		} catch (Exception e) {}

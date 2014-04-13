@@ -51,4 +51,5 @@ public class ClientProxy extends CommonProxy {
 	public World getClientWorld() {
 		return Minecraft.getMinecraft().theWorld;
 	}
+	
 }

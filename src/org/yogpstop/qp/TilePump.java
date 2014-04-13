@@ -51,20 +51,16 @@ import net.minecraftforge.fluids.FluidTankInfo;
 import net.minecraftforge.fluids.IFluidBlock;
 import net.minecraftforge.fluids.IFluidHandler;
 
-public class TilePump extends APacketTile implements IFluidHandler, IPowerReceptor, IEnchantableTile {
+public class TilePump extends AEnchantableTile implements IFluidHandler, IPowerReceptor {
 	private ForgeDirection connectTo = ForgeDirection.UNKNOWN;
 	private boolean initialized = false;
 
 	private byte prev = (byte) ForgeDirection.UNKNOWN.ordinal();
 
-	protected byte unbreaking;
-	protected byte fortune;
-	protected boolean silktouch;
-
-	TileBasic G_connected() {
+	TileMiningCore G_connected() {
 		TileEntity te = this.worldObj.getBlockTileEntity(this.xCoord + this.connectTo.offsetX, this.yCoord + this.connectTo.offsetY, this.zCoord
 				+ this.connectTo.offsetZ);
-		if (te instanceof TileBasic) return (TileBasic) te;
+		if (te instanceof TileMiningCore) return (TileMiningCore) te;
 		this.connectTo = ForgeDirection.UNKNOWN;
 		S_sendNowPacket();
 		return null;
@@ -77,9 +73,6 @@ public class TilePump extends APacketTile implements IFluidHandler, IPowerRecept
 	@Override
 	public void readFromNBT(NBTTagCompound nbttc) {
 		super.readFromNBT(nbttc);
-		this.silktouch = nbttc.getBoolean("silktouch");
-		this.fortune = nbttc.getByte("fortune");
-		this.unbreaking = nbttc.getByte("unbreaking");
 		this.connectTo = ForgeDirection.values()[nbttc.getByte("connectTo")];
 		if (nbttc.getTag("mapping0") instanceof NBTTagList) for (int i = 0; i < this.mapping.length; i++)
 			readStringCollection(nbttc.getTagList(String.format("mapping%d", i)), this.mapping[i]);
@@ -104,9 +97,6 @@ public class TilePump extends APacketTile implements IFluidHandler, IPowerRecept
 	@Override
 	public void writeToNBT(NBTTagCompound nbttc) {
 		super.writeToNBT(nbttc);
-		nbttc.setBoolean("silktouch", this.silktouch);
-		nbttc.setByte("fortune", this.fortune);
-		nbttc.setByte("unbreaking", this.unbreaking);
 		nbttc.setByte("connectTo", (byte) this.connectTo.ordinal());
 		for (int i = 0; i < this.mapping.length; i++)
 			nbttc.setTag(String.format("mapping%d", i), writeStringCollection(this.mapping[i]));
@@ -150,7 +140,7 @@ public class TilePump extends APacketTile implements IFluidHandler, IPowerRecept
 		pY = this.yCoord + this.connectTo.offsetY;
 		pZ = this.zCoord + this.connectTo.offsetZ;
 		te = this.worldObj.getBlockTileEntity(pX, pY, pZ);
-		if (te instanceof TileBasic && ((TileBasic) te).S_connect(this.connectTo.getOpposite())) {
+		if (te instanceof TileMiningCore && ((TileMiningCore) te).S_connect(this.connectTo.getOpposite())) {
 			S_sendNowPacket();
 			this.initialized = true;
 		} else if (this.worldObj.isAirBlock(pX, pY, pZ) || this.connectTo == ForgeDirection.UNKNOWN) {
@@ -166,7 +156,7 @@ public class TilePump extends APacketTile implements IFluidHandler, IPowerRecept
 		TileEntity te;
 		for (ForgeDirection fd : ForgeDirection.VALID_DIRECTIONS) {
 			te = this.worldObj.getBlockTileEntity(this.xCoord + fd.offsetX, this.yCoord + fd.offsetY, this.zCoord + fd.offsetZ);
-			if (te instanceof TileBasic && ((TileBasic) te).S_connect(fd.getOpposite())) {
+			if (te instanceof TileMiningCore && ((TileMiningCore) te).S_connect(fd.getOpposite())) {
 				this.connectTo = fd;
 				S_sendNowPacket();
 				return;
@@ -186,7 +176,7 @@ public class TilePump extends APacketTile implements IFluidHandler, IPowerRecept
 	}
 
 	@Override
-	void S_recievePacket(byte pattern, ByteArrayDataInput data, EntityPlayer ep) {
+	public void S_recievePacket(byte pattern, ByteArrayDataInput data, EntityPlayer ep) {
 		byte target;
 		int pos;
 		String buf;
@@ -255,7 +245,7 @@ public class TilePump extends APacketTile implements IFluidHandler, IPowerRecept
 	}
 
 	@Override
-	void C_recievePacket(byte pattern, ByteArrayDataInput data, EntityPlayer ep) {
+	public void C_recievePacket(byte pattern, ByteArrayDataInput data, EntityPlayer ep) {
 		switch (pattern) {
 		case PacketHandler.StC_NOW:// B
 			byte flag = data.readByte();
@@ -314,7 +304,7 @@ public class TilePump extends APacketTile implements IFluidHandler, IPowerRecept
 	private int count;
 
 	private Box S_getBox() {
-		TileBasic tb = G_connected();
+		TileMiningCore tb = G_connected();
 		if (tb instanceof TileQuarry) return ((TileQuarry) tb).box;
 		return null;
 	}
@@ -478,6 +468,7 @@ public class TilePump extends APacketTile implements IFluidHandler, IPowerRecept
 
 	// ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	private final LinkedList<FluidStack> liquids = new LinkedList<FluidStack>();
+	@SuppressWarnings("unchecked")
 	public final LinkedList<String>[] mapping = new LinkedList[ForgeDirection.VALID_DIRECTIONS.length];
 
 	{
@@ -601,7 +592,7 @@ public class TilePump extends APacketTile implements IFluidHandler, IPowerRecept
 
 	@Override
 	public PowerReceiver getPowerReceiver(ForgeDirection side) {
-		TileBasic tb = G_connected();
+		TileMiningCore tb = G_connected();
 		return tb == null ? null : tb.getPowerReceiver(side);
 	}
 
@@ -613,30 +604,4 @@ public class TilePump extends APacketTile implements IFluidHandler, IPowerRecept
 		return this.worldObj;
 	}
 
-	@Override
-	public byte getEfficiency() {
-		return 0;
-	}
-
-	@Override
-	public byte getFortune() {
-		return this.fortune;
-	}
-
-	@Override
-	public byte getUnbreaking() {
-		return this.unbreaking;
-	}
-
-	@Override
-	public boolean getSilktouch() {
-		return this.silktouch;
-	}
-
-	@Override
-	public void set(byte pefficiency, byte pfortune, byte punbreaking, boolean psilktouch) {
-		this.fortune = pfortune;
-		this.unbreaking = punbreaking;
-		this.silktouch = psilktouch;
-	}
 }

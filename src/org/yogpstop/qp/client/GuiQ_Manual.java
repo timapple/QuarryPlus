@@ -18,7 +18,7 @@
 package org.yogpstop.qp.client;
 
 import org.yogpstop.qp.PacketHandler;
-import org.yogpstop.qp.TileBasic;
+import org.yogpstop.qp.TileMiningCore;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -34,16 +34,17 @@ public class GuiQ_Manual extends GuiScreenA {
 	private GuiTextField blockid;
 	private GuiTextField meta;
 	private byte targetid;
-	private TileBasic tile;
+	private TileMiningCore tile;
 	private short bid;
 	private int metaid;
 
-	public GuiQ_Manual(GuiScreen parents, byte id, TileBasic tq) {
+	public GuiQ_Manual(GuiScreen parents, byte id, TileMiningCore tq) {
 		super(parents);
 		this.targetid = id;
 		this.tile = tq;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void initGui() {
 		this.buttonList.add(new GuiButton(-1, this.width / 2 - 150, this.height - 26, 140, 20, StatCollector.translateToLocal("gui.done")));

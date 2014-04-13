@@ -18,6 +18,7 @@
 package org.yogpstop.qp;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 
 public class CommonProxy {
@@ -29,5 +30,17 @@ public class CommonProxy {
 
 	public World getClientWorld() {
 		return null;
+	}
+	
+	public boolean eventQuarryMakeFrame( TileEntity e, int x, int y, int z ) {
+		return true;
+	}
+	
+	public boolean eventQuarryBreakBlock( TileEntity e, int x, int y, int z ) {
+		return true;
+	}
+			
+	public boolean eventMiningWellBreakBlock( TileEntity e, int x, int y, int z ) {
+		return true;
 	}
 }

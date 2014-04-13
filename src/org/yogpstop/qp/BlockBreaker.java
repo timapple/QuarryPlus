@@ -124,7 +124,7 @@ public class BlockBreaker extends BlockContainer {
 		if (b.canSilkHarvest(world, player, tx, ty, tz, meta) && tile.silktouch) {
 			alis = new ArrayList<ItemStack>();
 			try {
-				ItemStack is = (ItemStack) TileBasic.createStackedBlock.invoke(b, meta);
+				ItemStack is = (ItemStack) TileMiningCore.createStackedBlock.invoke(b, meta);
 				if (is != null) alis.add(is);
 			} catch (IllegalAccessException e) {
 				e.printStackTrace();
@@ -157,7 +157,7 @@ public class BlockBreaker extends BlockContainer {
 
 	@Override
 	public void onBlockPlacedBy(World world, int x, int y, int z, EntityLivingBase ent, ItemStack is) {
-		EnchantmentHelper.init((IEnchantableTile) world.getBlockTileEntity(x, y, z), is.getEnchantmentTagList());
+		EnchantmentHelper.init((IEnchantableTile) world.getBlockTileEntity(x, y, z), is);
 		world.setBlockMetadataWithNotify(x, y, z, BlockPistonBase.determineOrientation(world, x, y, z, ent), 2);
 	}
 

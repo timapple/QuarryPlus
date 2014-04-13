@@ -47,11 +47,11 @@ import buildcraft.api.core.LaserKind;
 import buildcraft.core.EntityBlock;
 import buildcraft.core.proxy.CoreProxy;
 
-public class TileMarker extends APacketTile implements IAreaProvider {
+public class TileMarker extends APacketRecieverTile implements IAreaProvider {
 	static final ArrayList<Link> linkList = new ArrayList<Link>();
 	static final ArrayList<Laser> laserList = new ArrayList<Laser>();
 
-	private static final int MAX_SIZE = 256;
+	private static final int MAX_SIZE = 64;
 	public Link link;
 	public Laser laser;
 
@@ -479,7 +479,7 @@ public class TileMarker extends APacketTile implements IAreaProvider {
 	}
 
 	@Override
-	void S_recievePacket(byte pattern, ByteArrayDataInput data, EntityPlayer ep) {// onPacketData
+	public void S_recievePacket(byte pattern, ByteArrayDataInput data, EntityPlayer ep) {// onPacketData
 		switch (pattern) {
 		case PacketHandler.CtS_LINK_REQ:
 			if (this.link != null) {
@@ -511,7 +511,7 @@ public class TileMarker extends APacketTile implements IAreaProvider {
 	}
 
 	@Override
-	void C_recievePacket(byte pattern, ByteArrayDataInput data, EntityPlayer ep) {// onPacketData
+	public void C_recievePacket(byte pattern, ByteArrayDataInput data, EntityPlayer ep) {// onPacketData
 		switch (pattern) {
 		case PacketHandler.StC_LINK_RES:
 			if (this.link != null) this.link.removeConnection(false);

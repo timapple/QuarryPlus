@@ -34,12 +34,12 @@ import static buildcraft.BuildCraftFactory.plainPipeBlock;
 import static buildcraft.core.utils.Utils.addToRandomPipeAround;
 import static buildcraft.core.utils.Utils.addToRandomInventoryAround;
 
-public class TileMiningWell extends TileBasic {
+public class TileMiningWell extends TileMiningCore {
 
 	private boolean working;
 
 	@Override
-	protected void C_recievePacket(byte pattern, ByteArrayDataInput data, EntityPlayer ep) {
+	public void C_recievePacket(byte pattern, ByteArrayDataInput data, EntityPlayer ep) {
 		super.C_recievePacket(pattern, data, ep);
 		switch (pattern) {
 		case PacketHandler.StC_NOW:
@@ -67,6 +67,9 @@ public class TileMiningWell extends TileBasic {
 		super.updateEntity();
 		if (this.worldObj.isRemote) return;
 		int depth = this.yCoord - 1;
+		
+		if (QuarryPlus.proxy.eventMiningWellBreakBlock( this, this.xCoord, depth, this.zCoord )) return;
+		
 		while (!S_checkTarget(depth)) {
 			if (this.working) this.worldObj.setBlock(this.xCoord, depth, this.zCoord, plainPipeBlock.blockID);
 			depth--;
@@ -102,6 +105,8 @@ public class TileMiningWell extends TileBasic {
 	}
 
 	private boolean S_breakBlock(int depth) {
+		//if (QuarryPlus.proxy.eventMiningWellBreakBlock( this, this.xCoord, depth, this.zCoord )) return false;
+		
 		return S_breakBlock(this.xCoord, depth, this.zCoord, PowerManager.BreakType.MiningWell);
 	}
 
@@ -143,4 +148,5 @@ public class TileMiningWell extends TileBasic {
 	public boolean isActive() {
 		return this.working;
 	}
+
 }

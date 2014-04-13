@@ -23,7 +23,6 @@ import static org.yogpstop.qp.PacketHandler.*;
 import java.io.ByteArrayOutputStream;
 import java.io.DataOutputStream;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -36,8 +35,6 @@ import net.minecraft.block.Block;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.nbt.NBTTagLong;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeDirection;
@@ -48,21 +45,18 @@ import buildcraft.api.power.IPowerReceptor;
 import buildcraft.api.power.PowerHandler.PowerReceiver;
 import buildcraft.core.IMachine;
 
-public abstract class TileBasic extends APacketTile implements IPowerReceptor, IMachine, IEnchantableTile {
+public abstract class TileMiningCore extends AEnchantableTile implements IPowerReceptor, IMachine {
 	protected ForgeDirection pump = ForgeDirection.UNKNOWN;
 
 	protected PowerHandler pp = new PowerHandler(this, PowerHandler.Type.MACHINE);
 
-	public final List<Long> fortuneList = new ArrayList<Long>();
-	public final List<Long> silktouchList = new ArrayList<Long>();
-	public boolean fortuneInclude, silktouchInclude;
-
-	protected byte unbreaking;
-	protected byte fortune;
-	protected boolean silktouch;
-	protected byte efficiency;
-
 	protected final List<ItemStack> cacheItems = new LinkedList<ItemStack>();
+	
+	protected boolean notEnoughEnergy = false; 
+
+	public boolean isNotEnoughEnergy() {
+		return notEnoughEnergy;
+	}
 
 	void sendOpenGUI(EntityPlayer ep, byte id) {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -84,7 +78,7 @@ public abstract class TileBasic extends APacketTile implements IPowerReceptor, I
 	}
 
 	@Override
-	protected void S_recievePacket(byte pattern, ByteArrayDataInput data, EntityPlayer ep) {
+	public void S_recievePacket(byte pattern, ByteArrayDataInput data, EntityPlayer ep) {
 		switch (pattern) {
 		case CtS_ADD_FORTUNE:
 			this.fortuneList.add(data.readLong());
@@ -113,7 +107,9 @@ public abstract class TileBasic extends APacketTile implements IPowerReceptor, I
 		}
 	}
 
-	protected abstract void G_renew_powerConfigure();
+	protected void G_renew_powerConfigure() {
+		notEnoughEnergy = false;
+	}
 
 	protected abstract void G_destroy();
 
@@ -130,7 +126,7 @@ public abstract class TileBasic extends APacketTile implements IPowerReceptor, I
 	}
 
 	@Override
-	protected void C_recievePacket(byte pattern, ByteArrayDataInput data, EntityPlayer ep) {
+	public void C_recievePacket(byte pattern, ByteArrayDataInput data, EntityPlayer ep) {
 		switch (pattern) {
 		case StC_OPENGUI_FORTUNE:
 			this.fortuneInclude = data.readBoolean();
@@ -153,7 +149,7 @@ public abstract class TileBasic extends APacketTile implements IPowerReceptor, I
 		}
 	}
 
-	protected boolean S_breakBlock(int x, int y, int z, PowerManager.BreakType t) {
+	protected boolean S_breakBlock(int x, int y, int z, PowerManager.BreakType t) {		
 		Collection<ItemStack> dropped = new LinkedList<ItemStack>();
 		Block b = Block.blocksList[this.worldObj.getBlockId(x, y, z)];
 		if (b instanceof IFluidBlock || b == Block.waterStill || b == Block.waterMoving || b == Block.lavaStill || b == Block.lavaMoving) {
@@ -165,7 +161,10 @@ public abstract class TileBasic extends APacketTile implements IPowerReceptor, I
 			}
 			return ((TilePump) te).S_removeLiquids(this.pp, x, y, z);
 		}
-		if (!PowerManager.useEnergyB(this.pp, S_blockHardness(x, y, z), S_addDroppedItems(dropped, x, y, z, t), this.unbreaking, t)) return false;
+		if (!PowerManager.useEnergyB(this.pp, S_blockHardness(x, y, z), S_addDroppedItems(dropped, x, y, z, t), this.unbreaking, t)) {
+			notEnoughEnergy = true;
+			return false;
+		}
 		this.cacheItems.addAll(dropped);
 		this.worldObj.playAuxSFXAtEntity(null, 2001, x, y, z, this.worldObj.getBlockId(x, y, z) | (this.worldObj.getBlockMetadata(x, y, z) << 12));
 		this.worldObj.setBlockToAir(x, y, z);
@@ -256,42 +255,13 @@ public abstract class TileBasic extends APacketTile implements IPowerReceptor, I
 	@Override
 	public void readFromNBT(NBTTagCompound nbttc) {
 		super.readFromNBT(nbttc);
-		this.silktouch = nbttc.getBoolean("silktouch");
-		this.fortune = nbttc.getByte("fortune");
-		this.efficiency = nbttc.getByte("efficiency");
-		this.unbreaking = nbttc.getByte("unbreaking");
-		this.fortuneInclude = nbttc.getBoolean("fortuneInclude");
-		this.silktouchInclude = nbttc.getBoolean("silktouchInclude");
-		readLongCollection(nbttc.getTagList("fortuneList"), this.fortuneList);
-		readLongCollection(nbttc.getTagList("silktouchList"), this.silktouchList);
 		this.pp.readFromNBT(nbttc);
-	}
-
-	private static void readLongCollection(NBTTagList nbttl, Collection<Long> target) {
-		target.clear();
-		for (int i = 0; i < nbttl.tagCount(); i++)
-			target.add(((NBTTagLong) nbttl.tagAt(i)).data);
 	}
 
 	@Override
 	public void writeToNBT(NBTTagCompound nbttc) {
 		super.writeToNBT(nbttc);
-		nbttc.setBoolean("silktouch", this.silktouch);
-		nbttc.setByte("fortune", this.fortune);
-		nbttc.setByte("efficiency", this.efficiency);
-		nbttc.setByte("unbreaking", this.unbreaking);
-		nbttc.setBoolean("fortuneInclude", this.fortuneInclude);
-		nbttc.setBoolean("silktouchInclude", this.silktouchInclude);
-		nbttc.setTag("fortuneList", writeLongCollection(this.fortuneList));
-		nbttc.setTag("silktouchList", writeLongCollection(this.silktouchList));
 		this.pp.writeToNBT(nbttc);
-	}
-
-	private static NBTTagList writeLongCollection(Collection<Long> target) {
-		NBTTagList nbttl = new NBTTagList();
-		for (Long l : target)
-			nbttl.appendTag(new NBTTagLong("", l));
-		return nbttl;
 	}
 
 	@Override
@@ -302,31 +272,4 @@ public abstract class TileBasic extends APacketTile implements IPowerReceptor, I
 		return this.worldObj;
 	}
 
-	@Override
-	public byte getEfficiency() {
-		return this.efficiency;
-	}
-
-	@Override
-	public byte getFortune() {
-		return this.fortune;
-	}
-
-	@Override
-	public byte getUnbreaking() {
-		return this.unbreaking;
-	}
-
-	@Override
-	public boolean getSilktouch() {
-		return this.silktouch;
-	}
-
-	@Override
-	public void set(byte pefficiency, byte pfortune, byte punbreaking, boolean psilktouch) {
-		this.efficiency = pefficiency;
-		this.fortune = pfortune;
-		this.unbreaking = punbreaking;
-		this.silktouch = psilktouch;
-	}
 }

@@ -32,7 +32,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraftforge.common.ForgeDirection;
 
-public class TileInfMJSrc extends APacketTile {
+public class TileInfMJSrc extends APacketRecieverTile {
 	public float power = 10;
 	public int interval = 1;
 	private int cInterval = 1;
@@ -70,7 +70,7 @@ public class TileInfMJSrc extends APacketTile {
 	}
 
 	@Override
-	void S_recievePacket(byte pattern, ByteArrayDataInput data, EntityPlayer ep) {
+	public void S_recievePacket(byte pattern, ByteArrayDataInput data, EntityPlayer ep) {
 		switch (pattern) {
 		case PacketHandler.CtS_INFMJSRC:
 			this.power = data.readFloat();
@@ -81,7 +81,7 @@ public class TileInfMJSrc extends APacketTile {
 	}
 
 	@Override
-	void C_recievePacket(byte pattern, ByteArrayDataInput data, EntityPlayer ep) {
+	public void C_recievePacket(byte pattern, ByteArrayDataInput data, EntityPlayer ep) {
 		switch (pattern) {
 		case PacketHandler.StC_OPENGUI_INFMJSRC:
 			this.power = data.readFloat();

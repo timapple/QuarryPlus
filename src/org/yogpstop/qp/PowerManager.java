@@ -58,9 +58,9 @@ public class PowerManager {
 		B_CU = get(c, "UnbreakingCoefficient", 1);
 		B_CF = get(c, "FortuneCoefficient", 1.3);
 		B_CS = get(c, "SilktouchCoefficient", 2);
-		B_NR = get(c, "BaseMinRecieve", 100);
-		B_XR = get(c, "BaseMaxRecieve", 300);
-		B_MS = get(c, "BaseMaxStored", 15000);
+		B_NR = get(c, "BaseMinRecieve", 1);
+		B_XR = get(c, "BaseMaxRecieve", 500);
+		B_MS = get(c, "BaseMaxStored", 5000);
 
 		c = cg.getCategory(new StringBuilder().append(cn2).append("BreakBlock").append(Configuration.CATEGORY_SPLITTER).append("MoveHead").toString());
 		H_BP = get(c, "BasePower", 200);
@@ -70,9 +70,9 @@ public class PowerManager {
 		F_BP = get(c, "BasePower", 25);
 		F_CE = get(c, "EfficiencyCoefficient", 1.3);
 		F_CU = get(c, "UnbreakingCoefficient", 1);
-		F_NR = get(c, "BaseMinRecieve", 50);
-		F_XR = get(c, "BaseMaxRecieve", 100);
-		F_MS = get(c, "BaseMaxStored", 15000);
+		F_NR = get(c, "BaseMinRecieve", 1);
+		F_XR = get(c, "BaseMaxRecieve", 500);
+		F_MS = get(c, "BaseMaxStored", 5000);
 
 		cn2 = new StringBuilder().append(cn).append("Pump").append(Configuration.CATEGORY_SPLITTER).toString();
 		c = cg.getCategory(new StringBuilder().append(cn2).append("DrainLiquid").toString());
@@ -89,9 +89,9 @@ public class PowerManager {
 		W_CU = get(c, "UnbreakingCoefficient", 1);
 		W_CF = get(c, "FortuneCoefficient", 1.3);
 		W_CS = get(c, "SilktouchCoefficient", 2);
-		W_NR = get(c, "BaseMinRecieve", 100);
-		W_XR = get(c, "BaseMaxRecieve", 100);
-		W_MS = get(c, "BaseMaxStored", 1000);
+		W_NR = get(c, "BaseMinRecieve", 1);
+		W_XR = get(c, "BaseMaxRecieve", 500);
+		W_MS = get(c, "BaseMaxStored", 5000);
 
 		c = cg.getCategory(new StringBuilder().append(cn).append("Laser").toString());
 		L_BP = get(c, "BasePower", 4);
@@ -99,16 +99,16 @@ public class PowerManager {
 		L_CU = get(c, "UnbreakingCoefficient", 0.1);
 		L_CF = get(c, "FortuneCoefficient", 1.05);
 		L_CS = get(c, "SilktouchCoefficient", 1.1);
-		L_NR = get(c, "BaseMinRecieve", 25);
-		L_XR = get(c, "BaseMaxRecieve", 100);
-		L_MS = get(c, "BaseMaxStored", 1000);
+		L_NR = get(c, "BaseMinRecieve", 1);
+		L_XR = get(c, "BaseMaxRecieve", 500);
+		L_MS = get(c, "BaseMaxStored", 5000);
 
 		c = cg.getCategory(new StringBuilder().append(cn).append("Refinery").toString());
 		R_CE = get(c, "EfficiencyCoefficient", 1.3);
 		R_CU = get(c, "UnbreakingCoefficient", 1);
-		R_NR = get(c, "BaseMinRecieve", 25);
-		R_XR = get(c, "BaseMaxRecieve", 100);
-		R_MS = get(c, "BaseMaxStored", 1000);
+		R_NR = get(c, "BaseMinRecieve", 1);
+		R_XR = get(c, "BaseMaxRecieve", 500);
+		R_MS = get(c, "BaseMaxStored", 5000);
 
 		StringBuilder sb = new StringBuilder();
 
@@ -165,7 +165,8 @@ public class PowerManager {
 	}
 
 	static void configure0(PowerHandler pp) {
-		pp.configure(0, 0, 0, Float.MAX_VALUE);
+		//pp.configure(0, 0, 0, Float.MAX_VALUE);
+		pp.configure(0, 0, 0, 500000);
 	}
 
 	private static void configure(PowerHandler pp, double CE, byte E, byte U, double CU, double NR, double XR, double BP, double MS, byte pump) {

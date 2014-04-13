@@ -68,6 +68,8 @@ public class PacketHandler implements IPacketHandler {
 	public static final byte CtS_BOTTOM_MAPPING = 21;
 	public static final byte CtS_RENEW_DIRECTION = 22;
 	public static final byte CtS_COPY_MAPPING = 23;
+	
+	public static final byte StC_NOW2 = 24;
 
 	public static final byte remove_link = 0;
 	public static final byte remove_laser = 1;
@@ -83,8 +85,8 @@ public class PacketHandler implements IPacketHandler {
 		} else if (packet.channel.equals(Tile)) {
 			ByteArrayDataInput data = ByteStreams.newDataInput(packet.data);
 			TileEntity t = ((EntityPlayer) player).worldObj.getBlockTileEntity(data.readInt(), data.readInt(), data.readInt());
-			if (t instanceof APacketTile) {
-				APacketTile tb = (APacketTile) t;
+			if (t instanceof APacketRecieverTile) {
+				APacketRecieverTile tb = (APacketRecieverTile) t;
 				if (tb.worldObj.isRemote) tb.C_recievePacket(data.readByte(), data, (EntityPlayer) player);
 				else tb.S_recievePacket(data.readByte(), data, (EntityPlayer) player);
 			}
@@ -128,7 +130,7 @@ public class PacketHandler implements IPacketHandler {
 		return packet;
 	}
 
-	public static void sendPacketToServer(APacketTile te, byte id, long data) {// J
+	public static void sendPacketToServer(APacketRecieverTile te, byte id, long data) {// J
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		DataOutputStream dos = new DataOutputStream(bos);
 		try {
@@ -143,7 +145,7 @@ public class PacketHandler implements IPacketHandler {
 		PacketDispatcher.sendPacketToServer(composeTilePacket(bos));
 	}
 
-	public static void sendPacketToServer(APacketTile te, byte id, byte pos, String data) {// BLjava.lang.String;
+	public static void sendPacketToServer(APacketRecieverTile te, byte id, byte pos, String data) {// BLjava.lang.String;
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		DataOutputStream dos = new DataOutputStream(bos);
 		try {
@@ -159,7 +161,7 @@ public class PacketHandler implements IPacketHandler {
 		PacketDispatcher.sendPacketToServer(composeTilePacket(bos));
 	}
 
-	static void sendNowPacket(APacketTile te, byte data) {
+	static void sendNowPacket(APacketRecieverTile te, byte now) {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		DataOutputStream dos = new DataOutputStream(bos);
 		try {
@@ -167,14 +169,48 @@ public class PacketHandler implements IPacketHandler {
 			dos.writeInt(te.yCoord);
 			dos.writeInt(te.zCoord);
 			dos.writeByte(StC_NOW);
-			dos.writeByte(data);
+			dos.writeByte(now);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		PacketDispatcher.sendPacketToAllAround(te.xCoord, te.yCoord, te.zCoord, 256, te.worldObj.provider.dimensionId, composeTilePacket(bos));
+	}
+	
+	static void sendHeadPosPacket(APacketRecieverTile te, double headPosX, double headPosY, double headPosZ) {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		DataOutputStream dos = new DataOutputStream(bos);
+		try {
+			dos.writeInt(te.xCoord);
+			dos.writeInt(te.yCoord);
+			dos.writeInt(te.zCoord);
+			dos.writeByte(StC_HEAD_POS);
+			dos.writeDouble(headPosX);
+			dos.writeDouble(headPosY);
+			dos.writeDouble(headPosZ);
+			PacketDispatcher.sendPacketToAllAround(te.xCoord, te.yCoord, te.zCoord, 256, te.worldObj.provider.dimensionId,
+					composeTilePacket(bos));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	static void sendNowPacket(APacketRecieverTile te, byte now, boolean nee) {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		DataOutputStream dos = new DataOutputStream(bos);
+		try {
+			dos.writeInt(te.xCoord);
+			dos.writeInt(te.yCoord);
+			dos.writeInt(te.zCoord);
+			dos.writeByte(StC_NOW2);
+			dos.writeByte(now);
+			dos.writeBoolean(nee);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		PacketDispatcher.sendPacketToAllAround(te.xCoord, te.yCoord, te.zCoord, 256, te.worldObj.provider.dimensionId, composeTilePacket(bos));
 	}
 
-	public static void sendPacketToServer(APacketTile te, byte id) {
+	public static void sendPacketToServer(APacketRecieverTile te, byte id) {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		DataOutputStream dos = new DataOutputStream(bos);
 		try {
@@ -188,7 +224,7 @@ public class PacketHandler implements IPacketHandler {
 		PacketDispatcher.sendPacketToServer(composeTilePacket(bos));
 	}
 
-	static void sendPacketToAround(APacketTile te, byte id) {
+	static void sendPacketToAround(APacketRecieverTile te, byte id) {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		DataOutputStream dos = new DataOutputStream(bos);
 		try {

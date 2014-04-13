@@ -20,7 +20,7 @@ package org.yogpstop.qp.client;
 import static org.yogpstop.qp.QuarryPlus.data;
 
 import org.yogpstop.qp.PacketHandler;
-import org.yogpstop.qp.TileBasic;
+import org.yogpstop.qp.TileMiningCore;
 
 import net.minecraft.client.gui.GuiButton;
 import net.minecraft.client.gui.GuiScreen;
@@ -31,15 +31,16 @@ import cpw.mods.fml.relauncher.SideOnly;
 @SideOnly(Side.CLIENT)
 public class GuiQ_SelectBlock extends GuiScreenA {
 	private GuiQ_SlotBlockList blocks;
-	private TileBasic tile;
+	private TileMiningCore tile;
 	private byte targetid;
 
-	public GuiQ_SelectBlock(GuiScreen pscr, TileBasic tb, byte id) {
+	public GuiQ_SelectBlock(GuiScreen pscr, TileMiningCore tb, byte id) {
 		super(pscr);
 		this.tile = tb;
 		this.targetid = id;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void initGui() {
 		this.blocks = new GuiQ_SlotBlockList(this.mc, this.width, this.height, 24, this.height - 32, 18, this, this.targetid == 0 ? this.tile.fortuneList

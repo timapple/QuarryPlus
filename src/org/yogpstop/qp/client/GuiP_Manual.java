@@ -40,6 +40,7 @@ public class GuiP_Manual extends GuiScreenA {
 		this.tile = tq;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void initGui() {
 		this.buttonList.add(new GuiButton(-1, this.width / 2 - 150, this.height - 26, 140, 20, StatCollector.translateToLocal("gui.done")));

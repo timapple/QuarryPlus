@@ -115,7 +115,7 @@ public class BlockPump extends BlockContainer {
 	@Override
 	public void onBlockPlacedBy(World w, int x, int y, int z, EntityLivingBase el, ItemStack is) {
 		super.onBlockPlacedBy(w, x, y, z, el, is);
-		EnchantmentHelper.init((IEnchantableTile) w.getBlockTileEntity(x, y, z), is.getEnchantmentTagList());
+		EnchantmentHelper.init((IEnchantableTile) w.getBlockTileEntity(x, y, z), is);
 	}
 
 	@Override

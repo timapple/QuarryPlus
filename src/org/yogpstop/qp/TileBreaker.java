@@ -20,11 +20,8 @@ package org.yogpstop.qp;
 import buildcraft.api.gates.IAction;
 import buildcraft.core.IMachine;
 import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.tileentity.TileEntity;
 
-public class TileBreaker extends TileEntity implements IEnchantableTile, IMachine {
-	boolean silktouch = false;
-	byte fortune = 0;
+public class TileBreaker extends AEnchantableTile implements IMachine { 
 
 	@Override
 	public void readFromNBT(NBTTagCompound nbttc) {
@@ -38,32 +35,6 @@ public class TileBreaker extends TileEntity implements IEnchantableTile, IMachin
 		super.writeToNBT(nbttc);
 		nbttc.setBoolean("silktouch", this.silktouch);
 		nbttc.setByte("fortune", this.fortune);
-	}
-
-	@Override
-	public byte getEfficiency() {
-		return 0;
-	}
-
-	@Override
-	public byte getFortune() {
-		return this.fortune;
-	}
-
-	@Override
-	public byte getUnbreaking() {
-		return 0;
-	}
-
-	@Override
-	public boolean getSilktouch() {
-		return this.silktouch;
-	}
-
-	@Override
-	public void set(byte pefficiency, byte pfortune, byte punbreaking, boolean psilktouch) {
-		this.fortune = pfortune;
-		this.silktouch = psilktouch;
 	}
 
 	@Override
@@ -88,4 +59,10 @@ public class TileBreaker extends TileEntity implements IEnchantableTile, IMachin
 	public boolean allowAction(IAction action) {
 		return false;
 	}
+	
+	@Override
+	public boolean canUpdate() {
+		return false;
+	}
+
 }

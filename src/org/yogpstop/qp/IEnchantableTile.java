@@ -17,16 +17,23 @@
 
 package org.yogpstop.qp;
 
+import java.util.List;
+
 public interface IEnchantableTile {
+	
 	void G_reinit();
 
 	byte getEfficiency();
-
 	byte getFortune();
-
 	byte getUnbreaking();
-
 	boolean getSilktouch();
 
 	void set(byte efficiency, byte fortune, byte unbreaking, boolean silktouch);
+	void setFortuneConfig( Boolean include, List<Long> list );
+	void setSilctouchConfig( Boolean include, List<Long> list );
+	
+	List<Long> getFortuneList();
+	List<Long> getSilktouchList();
+	boolean getFortuneInclude();
+	boolean getSilktouchInclude();
 }

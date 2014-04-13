@@ -18,7 +18,7 @@
 package org.yogpstop.qp.client;
 
 import org.yogpstop.qp.PacketHandler;
-import org.yogpstop.qp.TileBasic;
+import org.yogpstop.qp.TileMiningCore;
 
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
@@ -30,10 +30,10 @@ import static org.yogpstop.qp.QuarryPlus.getname;
 public class GuiQ_List extends GuiScreenA {
 	private GuiQ_SlotList oreslot;
 	private GuiButton delete;
-	private TileBasic tile;
+	private TileMiningCore tile;
 	private byte targetid;
 
-	public GuiQ_List(byte id, TileBasic tq) {
+	public GuiQ_List(byte id, TileMiningCore tq) {
 		super(null);
 		this.targetid = id;
 		this.tile = tq;
@@ -44,6 +44,7 @@ public class GuiQ_List extends GuiScreenA {
 		return this.tile.silktouchInclude;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void initGui() {
 		this.buttonList.add(new GuiButton(-1, this.width / 2 - 125, this.height - 26, 250, 20, StatCollector.translateToLocal("gui.done")));

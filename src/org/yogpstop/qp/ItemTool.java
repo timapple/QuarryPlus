@@ -28,6 +28,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Icon;
 import net.minecraft.world.World;
 
@@ -40,6 +41,7 @@ public class ItemTool extends Item implements IEnchantableItem {
 		setHasSubtypes(true);
 		this.setMaxDamage(0);
 		setCreativeTab(QuarryPlus.ct);
+		setUnlocalizedName("item.statusChecker");
 	}
 
 	@Override
@@ -61,6 +63,8 @@ public class ItemTool extends Item implements IEnchantableItem {
 
 	@Override
 	public boolean onItemUse(ItemStack is, EntityPlayer ep, World w, int x, int y, int z, int side, float par8, float par9, float par10) {
+		if (w.isRemote) return false;
+		
 		if (is.getItemDamage() == 1) {
 			boolean s = false, f = false;
 			NBTTagList nbttl = is.getEnchantmentTagList();
@@ -69,9 +73,13 @@ public class ItemTool extends Item implements IEnchantableItem {
 				if (id == 33) s = true;
 				if (id == 35) f = true;
 			}
-			if (w.getBlockTileEntity(x, y, z) instanceof TileBasic && s != f) {
-				if (!w.isRemote) ((TileBasic) w.getBlockTileEntity(x, y, z)).sendOpenGUI(ep, f ? PacketHandler.StC_OPENGUI_FORTUNE
-						: PacketHandler.StC_OPENGUI_SILKTOUCH);
+			
+			TileEntity te = w.getBlockTileEntity(x, y, z);
+			if ((te == null) || !(te instanceof TileMiningCore) || (s == f)) return false;
+			
+			TileMiningCore tc = (TileMiningCore) te;
+			if ( (tc.silktouch && s) || (tc.fortune > 0 && f) ) {
+				tc.sendOpenGUI(ep, f ? PacketHandler.StC_OPENGUI_FORTUNE : PacketHandler.StC_OPENGUI_SILKTOUCH);
 				return true;
 			}
 		}
@@ -89,6 +97,7 @@ public class ItemTool extends Item implements IEnchantableItem {
 		return "item.statusChecker";
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	@SideOnly(Side.CLIENT)
 	public void getSubItems(int par1, CreativeTabs par2CreativeTabs, List par3List) {

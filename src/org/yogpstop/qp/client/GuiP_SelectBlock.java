@@ -38,6 +38,7 @@ public class GuiP_SelectBlock extends GuiScreenA {
 		this.targetid = id;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void initGui() {
 		this.blocks = new GuiP_SlotBlockList(this.mc, this.width, this.height, 24, this.height - 32, 18, this, this.tile.mapping[this.targetid]);

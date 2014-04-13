@@ -43,6 +43,7 @@ public class GuiP_SelectSide extends GuiScreenA {
 		this.to = pparent.dir;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void initGui() {
 		this.buttonList
