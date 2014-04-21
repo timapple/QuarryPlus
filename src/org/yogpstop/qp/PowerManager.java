@@ -166,7 +166,7 @@ public class PowerManager {
 
 	static void configure0(PowerHandler pp) {
 		//pp.configure(0, 0, 0, Float.MAX_VALUE);
-		pp.configure(0, 0, 0, 500000);
+		pp.configure(0, 0, 0, 5000);
 	}
 
 	private static void configure(PowerHandler pp, double CE, byte E, byte U, double CU, double NR, double XR, double BP, double MS, byte pump) {

@@ -35,7 +35,7 @@ public class ChunkLoadingHandler implements ForgeChunkManager.OrderedLoadingCall
 			int quarryZ = ticket.getModData().getInteger("quarryZ");
 			TileEntity te = world.getBlockTileEntity(quarryX, quarryY, quarryZ);
 			if (te instanceof TileQuarry) ((TileQuarry) te).forceChunkLoading(ticket);
-			else if (te instanceof TileMarker) ((TileMarker) te).forceChunkLoading(ticket);
+			//else if (te instanceof TileMarker) ((TileMarker) te).forceChunkLoading(ticket);
 		}
 	}
 
@@ -48,7 +48,7 @@ public class ChunkLoadingHandler implements ForgeChunkManager.OrderedLoadingCall
 			int quarryZ = ticket.getModData().getInteger("quarryZ");
 
 			int blId = world.getBlockId(quarryX, quarryY, quarryZ);
-			if (blId == QuarryPlus.blockQuarry.blockID || blId == QuarryPlus.blockMarker.blockID) {
+			if (blId == QuarryPlus.blockQuarry.blockID) {// || blId == QuarryPlus.blockMarker.blockID) {
 				validTickets.add(ticket);
 			}
 		}

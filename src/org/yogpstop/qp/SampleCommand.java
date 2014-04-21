@@ -2,17 +2,17 @@ package org.yogpstop.qp;
 
 import java.util.ArrayList;
 //import java.util.HashMap;
-import java.util.Iterator;
+//import java.util.Iterator;
 import java.util.List;
-import java.util.Map.Entry;
-import java.util.TreeMap;
+//import java.util.Map.Entry;
+//import java.util.TreeMap;
 
 import net.minecraft.command.CommandBase;
 //import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.tileentity.TileEntity;
+//import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ChatMessageComponent;
-import net.minecraft.world.World;
+//import net.minecraft.world.World;
 
 public class SampleCommand extends CommandBase {
 
@@ -47,7 +47,7 @@ public class SampleCommand extends CommandBase {
 	@Override
 	public void processCommand(ICommandSender icommandsender, String[] astring)
 	{
-		int minCount = 1;
+		/*int minCount = 1;
 		if (astring.length == 0 || astring.length > 2)
 		{
 			ChatMessageComponent cmc = ChatMessageComponent.createFromText("Invalid arguments");
@@ -88,7 +88,10 @@ public class SampleCommand extends CommandBase {
         for ( Entry<String, Integer> e: map.entrySet()) {
         	cmc.addFormatted("    %10s: %d\n", e.getKey(), e.getValue());
         }
-        icommandsender.sendChatToPlayer(cmc);
+        icommandsender.sendChatToPlayer(cmc);*/
+		
+		ChatMessageComponent cmc = ChatMessageComponent.createFromText("quarryplus: hello!:\n");
+		icommandsender.sendChatToPlayer(cmc);
 	}
 
 	@Override

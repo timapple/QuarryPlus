@@ -108,7 +108,7 @@ public abstract class TileMiningCore extends AEnchantableTile implements IPowerR
 	}
 
 	protected void G_renew_powerConfigure() {
-		notEnoughEnergy = false;
+		//notEnoughEnergy = false;
 	}
 
 	protected abstract void G_destroy();
@@ -165,6 +165,7 @@ public abstract class TileMiningCore extends AEnchantableTile implements IPowerR
 			notEnoughEnergy = true;
 			return false;
 		}
+		notEnoughEnergy = false;
 		this.cacheItems.addAll(dropped);
 		this.worldObj.playAuxSFXAtEntity(null, 2001, x, y, z, this.worldObj.getBlockId(x, y, z) | (this.worldObj.getBlockMetadata(x, y, z) << 12));
 		this.worldObj.setBlockToAir(x, y, z);
@@ -256,12 +257,17 @@ public abstract class TileMiningCore extends AEnchantableTile implements IPowerR
 	public void readFromNBT(NBTTagCompound nbttc) {
 		super.readFromNBT(nbttc);
 		this.pp.readFromNBT(nbttc);
+		if (nbttc.hasKey("nee"))
+			this.notEnoughEnergy = nbttc.getBoolean("nee");
+		else
+			this.notEnoughEnergy = false;
 	}
 
 	@Override
 	public void writeToNBT(NBTTagCompound nbttc) {
 		super.writeToNBT(nbttc);
 		this.pp.writeToNBT(nbttc);
+		nbttc.setBoolean("nee", this.notEnoughEnergy);
 	}
 
 	@Override

@@ -22,9 +22,9 @@ import java.io.DataOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.Set;
+//import java.util.Set;
 
-import com.google.common.collect.Sets;
+//import com.google.common.collect.Sets;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteStreams;
 
@@ -33,15 +33,13 @@ import cpw.mods.fml.common.network.Player;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
+//import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.network.packet.Packet250CustomPayload;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.ChunkCoordIntPair;
+//import net.minecraft.world.ChunkCoordIntPair;
 import net.minecraft.world.World;
 import net.minecraft.block.Block;
-import net.minecraftforge.common.ForgeChunkManager;
-import net.minecraftforge.common.ForgeChunkManager.Ticket;
-import net.minecraftforge.common.ForgeChunkManager.Type;
+//import net.minecraftforge.common.ForgeChunkManager;
 import buildcraft.api.core.IAreaProvider;
 import buildcraft.api.core.LaserKind;
 import buildcraft.core.EntityBlock;
@@ -507,7 +505,7 @@ public class TileMarker extends APacketRecieverTile implements IAreaProvider {
 	void G_destroy() {
 		if (this.link != null) this.link.removeConnection(false);
 		if (this.laser != null) this.laser.destructor();
-		ForgeChunkManager.releaseTicket(this.chunkTicket);
+		//ForgeChunkManager.releaseTicket(this.chunkTicket);
 	}
 
 	@Override
@@ -524,7 +522,7 @@ public class TileMarker extends APacketRecieverTile implements IAreaProvider {
 		}
 	}
 
-	private Ticket chunkTicket;
+	/*private Ticket chunkTicket;
 
 	void requestTicket() {// onPostBlockPlaced
 		if (this.chunkTicket != null) return;
@@ -543,7 +541,7 @@ public class TileMarker extends APacketRecieverTile implements IAreaProvider {
 		ChunkCoordIntPair quarryChunk = new ChunkCoordIntPair(this.xCoord >> 4, this.zCoord >> 4);
 		chunks.add(quarryChunk);
 		ForgeChunkManager.forceChunk(ticket, quarryChunk);
-	}
+	}*/
 
 	private boolean vlF;
 

@@ -150,7 +150,7 @@ public class BlockMarker extends BlockContainer {
 
 	@Override
 	public void onPostBlockPlaced(World world, int x, int y, int z, int meta) {
-		((TileMarker) world.getBlockTileEntity(x, y, z)).requestTicket();
+		//((TileMarker) world.getBlockTileEntity(x, y, z)).requestTicket();
 		super.onPostBlockPlaced(world, x, y, z, meta);
 	}
 

@@ -76,7 +76,7 @@ public class TileQuarry extends TileMiningCore {
 		
 		byte old_now = now;
 		boolean old_nee = notEnoughEnergy;
-		notEnoughEnergy = false;
+		//notEnoughEnergy = false;
 		
 		switch (this.now) {
 		case MAKEFRAME:
@@ -273,6 +273,7 @@ public class TileQuarry extends TileMiningCore {
 			notEnoughEnergy = true;
 			return false;
 		}
+		notEnoughEnergy = false;
 		
 		this.worldObj.setBlock(this.targetX, this.targetY, this.targetZ, frameBlock.blockID);
 		S_setNextTarget();
@@ -412,12 +413,14 @@ public class TileQuarry extends TileMiningCore {
 			this.headPosX = this.targetX;
 			this.headPosY = this.targetY + 1;
 			this.headPosZ = this.targetZ;
+			notEnoughEnergy = false;
 			return true;
 		}
 		if (blocks > 0.1) {
 			this.headPosX += x * blocks / distance;
 			this.headPosY += y * blocks / distance;
 			this.headPosZ += z * blocks / distance;
+			notEnoughEnergy = false;
 			return false;
 		}
 		
@@ -465,10 +468,12 @@ public class TileQuarry extends TileMiningCore {
 		if (this.chunkTicket != null) return;
 		this.chunkTicket = ForgeChunkManager.requestTicket(QuarryPlus.instance, this.worldObj, Type.NORMAL);
 		if (this.chunkTicket == null) return;
+		
 		NBTTagCompound tag = this.chunkTicket.getModData();
 		tag.setInteger("quarryX", this.xCoord);
 		tag.setInteger("quarryY", this.yCoord);
 		tag.setInteger("quarryZ", this.zCoord);
+		
 		forceChunkLoading(this.chunkTicket);
 	}
 
@@ -478,6 +483,16 @@ public class TileQuarry extends TileMiningCore {
 		ChunkCoordIntPair quarryChunk = new ChunkCoordIntPair(this.xCoord >> 4, this.zCoord >> 4);
 		chunks.add(quarryChunk);
 		ForgeChunkManager.forceChunk(ticket, quarryChunk);
+
+		if (box.isInitialized()) {
+			for (int chunkX = box.xMin >> 4; chunkX <= box.xMax >> 4; chunkX++) {
+				for (int chunkZ = box.zMin >> 4; chunkZ <= box.zMax >> 4; chunkZ++) {
+					ChunkCoordIntPair chunk = new ChunkCoordIntPair(chunkX, chunkZ);
+					ForgeChunkManager.forceChunk(ticket, chunk);
+					chunks.add(chunk);
+				}
+			}
+		}
 	}
 
 	void setArm(EntityMechanicalArm ema) {
@@ -550,9 +565,9 @@ public class TileQuarry extends TileMiningCore {
 			if (this.heads != null) this.heads.setHead(this.headPosX, this.headPosY, this.headPosZ);
 			break;
 		case StC_NOW2:
+			G_renew_powerConfigure(); // change notEnoughEnergy
 			this.now = data.readByte();
 			this.notEnoughEnergy = data.readBoolean();
-			G_renew_powerConfigure();
 			this.worldObj.markBlockForRenderUpdate(this.xCoord, this.yCoord, this.zCoord);
 			G_initEntities();
 			break;
